@@ -27,18 +27,26 @@ func GetInfo(p int) (Proc, error) {
 		return Proc{}, err
 	}
 
-	return ParseStatus(string(b))
+	return ParseIntoProc(string(b))
 }
 
 // GetUnparsedInfo returns a map
 // of every field in the proc file.
-//func GetUnparsedInfo(p int) (map[]interface{}, error) {}
+func GetUnparsedInfo(p int) (map[string]string, error) {
+	filename := fmt.Sprintf(`/proc/%d/status`, p)
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return make(map[string]string, 0), err
+	}
+	return ParseStatus(string(b))
+}
 
 // ParseStatus parses the status file
 // in /proc/[pid]/status
-func ParseStatus(s string) (p Proc, err error) {
+// and returns a key value pair map
+func ParseStatus(s string) (fields map[string]string, err error) {
 	lines := strings.Split(s, "\n")
-	field := make(map[string]interface{})
+	fields = make(map[string]string)
 
 	// safety
 	defer func() {
@@ -65,22 +73,46 @@ func ParseStatus(s string) (p Proc, err error) {
 		key := strings.TrimSpace(line[:colon])
 		value := strings.TrimSpace(line[colon+1:])
 
-		field[key] = value
+		fields[key] = value
 	}
 
-	// convert some of the fields to ints
+	// i have named return values, this is less confusing though
+	return fields, err
+}
+
+func ParseIntoProc(s string) (p Proc, err error) {
+	fields, err := ParseStatus(s)
+	if err != nil {
+		return Proc{}, err
+	}
+
+	// safety
+	defer func() {
+		if e := recover(); e != nil {
+			switch t := e.(type) {
+			case error:
+				err = t
+			case string:
+				err = errors.New(t)
+			default:
+				err = fmt.Errorf("%v\n", t)
+			}
+		}
+	}()
+
+	// convert some of the fieldss to ints
 	// if it fails i want the value to be zero
 	// so i don't care about the error
-	field["Pid"], _ = strconv.Atoi(field["Pid"].(string))
-	field["Threads"], _ = strconv.Atoi(field["Threads"].(string))
+	pid, _ := strconv.Atoi(fields["Pid"])
+	threads, _ := strconv.Atoi(fields["Threads"])
 
 	// finally return
 	p = Proc{
-		Name:    field["Name"].(string),
-		Pid:     field["Pid"].(int),
-		State:   field["State"].(string),
-		Threads: field["Threads"].(int),
+		Name:    fields["Name"],
+		Pid:     pid,
+		State:   fields["State"],
+		Threads: threads,
 	}
-	// i have named return values, this is less confusing though
+
 	return p, err
 }
