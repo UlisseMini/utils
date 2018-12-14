@@ -1,5 +1,6 @@
 // +build linux darwin
 
+// package proc implements methods for querying processes on unix systems
 package proc
 
 import (
