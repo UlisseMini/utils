@@ -1,11 +1,11 @@
 package test_test
 
 import (
-	"utils/test"
-	"testing"
-	"os/exec"
-	"os"
 	"fmt"
+	"os"
+	"os/exec"
+	"testing"
+	"utils/test"
 )
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 
 func Test_test(t *testing.T) {
 	tc := test.Case{
-		Path:     "one",
+		Path:     "./one",
 		Expected: "one",
 	}
 
@@ -42,7 +42,7 @@ func Test_test(t *testing.T) {
 	}
 
 	tc = test.Case{
-		Path:     "two",
+		Path:     "./two",
 		Expected: "one",
 	}
 
