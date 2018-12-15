@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Proc holds information about a process
+// Proc holds (useful) information about a process
 type Proc struct {
 	Name    string
 	Pid     int
@@ -19,9 +19,9 @@ type Proc struct {
 	Threads int
 }
 
-// GetInfo returns the process
+// ProcStatus returns the process
 // information for p
-func GetInfo(p int) (Proc, error) {
+func ProcStatus(p int) (Proc, error) {
 	filename := fmt.Sprintf(`/proc/%d/status`, p)
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -31,9 +31,9 @@ func GetInfo(p int) (Proc, error) {
 	return ParseIntoProc(string(b))
 }
 
-// GetUnparsedInfo returns a map
+// GetStatusMap returns a map
 // of every field in the proc file.
-func GetUnparsedInfo(p int) (map[string]string, error) {
+func GetStatusMap(p int) (map[string]string, error) {
 	filename := fmt.Sprintf(`/proc/%d/status`, p)
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -81,6 +81,8 @@ func ParseStatus(s string) (fields map[string]string, err error) {
 	return fields, err
 }
 
+// Parse into proc takes a status file (s) and returns a Proc
+// and possible error.
 func ParseIntoProc(s string) (p Proc, err error) {
 	fields, err := ParseStatus(s)
 	if err != nil {
