@@ -22,15 +22,18 @@ type Case struct {
 }
 
 func (t Case) Run() error {
-	// context for timing out the command
+	// context for timing out the command (if they supplied timeout field)
 	ctx := context.Background()
-	ctx, _ = context.WithTimeout(ctx, t.Timeout)
+	if t.Timeout != 0 {
+		ctx, _ = context.WithTimeout(ctx, t.Timeout)
+	}
 
 	// create the command
 	cmd := exec.CommandContext(ctx, t.Path)
 
 	stdout, err := cmd.Output()
 	if err != nil {
+		// i wish there was a better way to do this :l
 		if err.Error() == "signal: killed" {
 			return errors.New("timeout exceeded")
 		}
