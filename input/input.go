@@ -17,8 +17,7 @@ var (
 // enters a newline.
 func Input(prompt string) (string, error) {
 	fmt.Print(prompt)
-	text, err := reader.ReadString('\n')
-	return text, err
+	return reader.ReadString('\n')
 }
 
 // WaitForEnter holds up proceedings until the user presses return
